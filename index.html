@@ -1,0 +1,70 @@
+<script>
+    countryCode = "FR"
+    apiKey = "6b7792b8d65b1ed337edd22e5afd8e96"
+    const cities = [
+        {
+            name: "St geours de Maremne",
+            lat: "",
+            lon: "",
+            zip: "40230",
+            temp_min: "",
+            temp_max: ""
+        },
+        {
+            name: "Toulouse",
+            lat: "",
+            lon: "",
+            zip: "31000",
+            temp_min: "",
+            temp_max: ""
+        },
+        {
+            name: "Mérignac",
+            lat: "",
+            lon: "",
+            zip: "33700",
+            temp_min: "",
+            temp_max: ""
+        }
+    ];
+    main();
+    async function main() {
+
+        for (const city of cities) {
+            const coordinates = await loadCoordinates(
+                city.zip,
+                countryCode,
+                apiKey
+            );
+
+            city.lat = coordinates.lat;
+            city.lon = coordinates.lon;
+        }
+
+        console.log(cities);
+
+        for (const city of cities) {
+            const weather = await loadWeather(
+                city.lat,
+                city.lon,
+                apiKey
+            );
+
+            console.log(city.name, weather);
+
+            city.temp_min = weather.list[0].main.temp_min;
+            city.temp_max = weather.list[0].main.temp_max;
+        }
+
+        console.log(cities);
+    }
+
+    async function loadCoordinates(zip,countryCode,apiKey){
+        const response = await fetch("http://api.openweathermap.org/geo/1.0/zip?zip=" + zip + ","+ countryCode + "&appid="+apiKey);
+        return await response.json();
+    }
+    async function loadWeather(lat,lon,apiKey) {
+        const response = await fetch("http://api.openweathermap.org/data/2.5/forecast?lat=" + lat +"&lon=" + lon + "&appid="+apiKey + "&units=metric&lang=fr");
+        return await response.json();
+    }
+</script>
