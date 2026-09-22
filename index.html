@@ -1,4 +1,11 @@
+<html>
+<select id="citySelect">
+    <option value="">Choose a city</option>
+</select>
+</html>
+
 <script>
+
     countryCode = "FR"
     apiKey = "6b7792b8d65b1ed337edd22e5afd8e96"
     const cities = [
@@ -27,6 +34,16 @@
             temp_max: ""
         }
     ];
+    const select = document.getElementById("citySelect");
+
+    for (const city of cities) {
+        const option = document.createElement("option");
+
+        option.value = city.zip;
+        option.textContent = city.name;
+
+        select.appendChild(option);
+    }
     main();
     async function main() {
 
