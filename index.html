@@ -2,6 +2,9 @@
 <select id="citySelect">
     <option value="">Choose a city</option>
 </select>
+<div id="weather-panel">
+
+</div>
 </html>
 
 <script>
@@ -15,7 +18,8 @@
             lon: "",
             zip: "40230",
             temp_min: "",
-            temp_max: ""
+            temp_max: "",
+            weather: {}
         },
         {
             name: "Toulouse",
@@ -23,7 +27,8 @@
             lon: "",
             zip: "31000",
             temp_min: "",
-            temp_max: ""
+            temp_max: "",
+            weather: {}
         },
         {
             name: "Mérignac",
@@ -31,7 +36,8 @@
             lon: "",
             zip: "33700",
             temp_min: "",
-            temp_max: ""
+            temp_max: "",
+            weather: {}
         }
     ];
     const select = document.getElementById("citySelect");
@@ -44,38 +50,107 @@
 
         select.appendChild(option);
     }
-    main();
-    async function main() {
+
+
+    async function getWeather() {
 
         for (const city of cities) {
-            const coordinates = await loadCoordinates(
-                city.zip,
-                countryCode,
-                apiKey
-            );
 
-            city.lat = coordinates.lat;
-            city.lon = coordinates.lon;
+            // Récupère les coordonnées de la ville
+
+            const coordinatesData = await loadCoordinates(city.zip,countryCode,apiKey)
+
+            city.lat = coordinatesData.lat;
+            city.lon = coordinatesData.lon;
+
+            // Récupère les prévisions météo
+            const weatherData = await loadWeather(city.lat,city.lon,apiKey)
+
+            const weather = {};
+
+            for (const threeHourForecast of weatherData.list) {
+
+                const date = threeHourForecast.dt_txt.split(" ")[0];
+
+                const tempMin = threeHourForecast.main.temp_min;
+                const tempMax = threeHourForecast.main.temp_max;
+
+                // Première prévision trouvée pour cette journée
+                if (!weather[date]) {
+                    weather[date] = {
+                        temp_min: tempMin,
+                        temp_max: tempMax
+                    };
+                }
+
+                // Sinon on compare avec les valeurs déjà enregistrées
+                else {
+
+                    if (tempMin < weather[date].temp_min) {
+                        weather[date].temp_min = tempMin;
+                    }
+
+                    if (tempMax > weather[date].temp_max) {
+                        weather[date].temp_max = tempMax;
+                    }
+                }
+            }
+
+            city.weather = weather;
         }
 
         console.log(cities);
 
-        for (const city of cities) {
-            const weather = await loadWeather(
-                city.lat,
-                city.lon,
-                apiKey
-            );
 
-            console.log(city.name, weather);
-
-            city.temp_min = weather.list[0].main.temp_min;
-            city.temp_max = weather.list[0].main.temp_max;
-        }
-
-        console.log(cities);
     }
 
+
+
+    let target = document.getElementById("weather-panel")
+    select.addEventListener("change", function () {
+        populateWeather(target, select.value);
+    });
+
+    function populateWeather(target, zip) {
+
+        // Récupère la ville avec le code postal
+        const city = cities.find(city => city.zip === zip);
+
+        if (!city) {
+            target.innerHTML = "";
+            return;
+        }
+
+        // Vide le conteneur
+        target.innerHTML = "";
+
+        // Informations de la ville
+        const title = document.createElement("h2");
+        title.textContent = city.name;
+
+        target.appendChild(title);
+
+        const coordinates = document.createElement("p");
+        coordinates.textContent = `Latitude : ${city.lat} - Longitude : ${city.lon}`;
+
+        target.appendChild(coordinates);
+
+        // Météo pour les cinq jours
+        for (const date in city.weather) {
+
+            const forecast = city.weather[date];
+
+            const weatherDay = document.createElement("div");
+
+            weatherDay.innerHTML = `
+            <h3>${date}</h3>
+            <p>Température min : ${forecast.temp_min} °C</p>
+            <p>Température max : ${forecast.temp_max} °C</p>
+        `;
+
+            target.appendChild(weatherDay);
+        }
+    }
     async function loadCoordinates(zip,countryCode,apiKey){
         const response = await fetch("http://api.openweathermap.org/geo/1.0/zip?zip=" + zip + ","+ countryCode + "&appid="+apiKey);
         return await response.json();
@@ -84,4 +159,6 @@
         const response = await fetch("http://api.openweathermap.org/data/2.5/forecast?lat=" + lat +"&lon=" + lon + "&appid="+apiKey + "&units=metric&lang=fr");
         return await response.json();
     }
+    getWeather();
+
 </script>
