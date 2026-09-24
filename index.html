@@ -20,8 +20,8 @@
 
 <script>
 
-    countryCode = "FR"
-    apiKey = "6b7792b8d65b1ed337edd22e5afd8e96"
+    const countryCode = "FR"
+    const apiKey = "6b7792b8d65b1ed337edd22e5afd8e96"
     const cities = [
         {
             name: "St geours de Maremne",
@@ -170,6 +170,6 @@
         const response = await fetch("http://api.openweathermap.org/data/2.5/forecast?lat=" + lat +"&lon=" + lon + "&appid="+apiKey + "&units=metric&lang=fr");
         return await response.json();
     }
-    getWeather();
+    await getWeather();
 
 </script>
