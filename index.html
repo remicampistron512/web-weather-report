@@ -16,9 +16,9 @@
     <div id="weather-panel"></div>
 
 </body>
-</html>
 
-<script>
+
+<script type="module">
 
     const countryCode = "FR"
     const apiKey = "6b7792b8d65b1ed337edd22e5afd8e96"
@@ -63,9 +63,7 @@
     }
 
 
-    async function getWeather() {
-
-        for (const city of cities) {
+    for (const city of cities) {
 
             // Récupère les coordonnées de la ville
 
@@ -113,7 +111,7 @@
         console.log(cities);
 
 
-    }
+
 
 
 
@@ -170,6 +168,7 @@
         const response = await fetch("http://api.openweathermap.org/data/2.5/forecast?lat=" + lat +"&lon=" + lon + "&appid="+apiKey + "&units=metric&lang=fr");
         return await response.json();
     }
-    await getWeather();
+
 
 </script>
+</html>
